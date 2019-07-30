@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style>
+    body {
+        width: 1000px;
+        margin: 0 auto;
+        background: #f7f7f7;
+    }
+
+    svg {
+        display: block;
+        margin: 0 auto;
+    }
+
+    blockquote {
+        border-left: 5px solid #ececec;
+        padding-left: 1rem;
+        margin: 1rem 0;
+        display: block;
+        margin-block-start: 1em;
+        margin-block-end: 1em;
+        margin-inline-start: 40px;
+        margin-inline-end: 40px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 18px;
+        font-style: italic;
+        color: #696969;
+    }
+
+    a:link, 
+    a:visited {
+        color: black;
+    }
+
+    a:hover {
+        color: darkred;
+    }
+
+    #play-button {
+        visibility: hidden;
+        position: relative;
+        top: -40px;
+        left: 47%;
+        background-image: linear-gradient(to bottom, #F4D00C, #E0A025);
+        border-radius: 15px;
+        border: none;
+        color: white;
+        width: 60px;
+        height: 30px;
+        box-shadow: 3px 4.5px 3px #999;
+        cursor: pointer;
+    }
+
+    #play-button:active {
+        background-image: none;
+        background-color: #696969;
+        box-shadow: 1.5px 2.75px 1.5px #666;
+        transform: translate(1.5px, 2.75px);
+    }
+
+    #play-button:focus {
+        outline: none;
+    }
+
+    #continue-button {
+        position: relative;
+        bottom: 10px;
+        left: 44%;
+        background-image: linear-gradient(to bottom, #F4D00C, #E0A025);
+        border-radius: 15px;
+        border: none;
+        color: white;
+        width: 80px;
+        height: 30px;
+        box-shadow: 3px 4.5px 3px #999;
+        cursor: pointer;
+    }
+
+    #continue-button:active {
+        background-image: none;
+        background-color: #696969;
+        box-shadow: 1.5px 2.75px 1.5px #666;
+        transform: translate(1.5px, 2.75px);
+    }
+
+    #continue-button:focus {
+        outline: none;
+    }
+
+    #tooltip {
+        opacity: 0.75;
+        display: none;
+        position: absolute;
+        text-align: center;
+        font-size: 12px;
+        line-height: 1.2;
+        background: black;
+        color: white;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        border: 0px;
+        padding: 5px 2px;
+        border-radius: 4px;
+    }
+    
+    .slider-label {
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 12px;
+        color: grey;
+    }
+
+    .slider-ticks {
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 10px;
+        color: grey;
+    }
+
+    .slider-track {
+        stroke-linecap: round;
+        stroke: grey;
+        stroke-width: 3px;
+        z-index: 1;
+    }
+
+    .slider-handle {
+        fill: grey;
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .intro {
+        background: #ffffff;
+        padding: 30px 0 16px 0;
+        position: relative;
+        margin-top: 3rem;
+        margin-bottom: 3rem
+    }
+
+    .title {
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size:64px;
+        line-height:1.3;
+        margin: 0 auto;
+        font-weight:300;
+        margin-top:100px;
+        margin-bottom: -50px;
+        width: 70%;
+    }
+
+    .byline {
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size:15px;
+        color: #696969;
+        margin: 0 auto;
+        width: 70%;
+    }
+
+    .chart {
+        display: none;
+        background: #f7f7f7;
+        padding: 16px 0 16px 0;
+        position: relative;
+        margin-top: 3rem;
+    }
+
+    .radar-ticks {
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 12px;
+        color: #696969;
+    }
+
+    .text-container {
+        background: #ffffff;
+        padding: 30px 0 16px 0;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .text {
+        font-family: "Georgia", Serif;
+        font-size: 20px;
+        line-height: 1.7;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 90%
+    }
+
+    .caption-topleft {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption-midleft {
+        position: absolute;
+        top: 230px;
+        left: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption-bottomleft {
+        position: absolute;
+        top: 390px;
+        left: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption-topright {
+        position: absolute;
+        top: 20px;
+        right: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption-midright {
+        position: absolute;
+        top: 230px;
+        right: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption-bottomright {
+        position: absolute;
+        top: 390px;
+        right: 50px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        font-size: 17px;
+        line-height: 1.2;
+        max-width: 40rem;
+        margin: 0 auto;
+        width: 20%;
+        height: 200px;
+    }
+
+    .caption {
+        font-size: 12px;
+    }
+
+    .data-source {
+        position: absolute;
+        font-size: 10px;
+        top: 550px;
+        left: 550px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        color: #696969;
+    }
+
+    .footnote {
+        display: none;
+        position: relative;
+        left: 50px;
+        font-size: 10px;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        color: #696969;
+        padding-bottom: 10px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        opacity: 0.8;
+        background: black;
+        color: black;
+        font-family: "Trebuchet MS", Helvetica, sans-serifsans-serif;
+        border: 0px;
+        border-radius: 4px;
+    }
+
+    .modal-text {
+        background-color: #f7f7f7;
+        margin: auto;
+        padding: 20px;
+        width: 80%;
+    }
+
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        top: 80%;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<body onload='init()'>
+<div class=intro>
+    <div class=title>
+        <p>The History of Climate Change Science</p>
+    </div>
+    <div class=byline>
+        <p>By Joel Kopp [<a href="mailto:joelk2@illinois.edu">joelk2@illinois.edu</a>]</p>
+    </div>
+    <div class=text-container>
+        <div class=text>
+            <p>Ever since the invention of the steam engine by Thomas Newcomen in 1712, industrialized societies have been releasing carbon dioxide into the environment at an increasing rate.  The study of the affects of this on climate is not a recent development.  In 1824, around the beginning of the first Industrial Revolution, a French physicist named Joseph Fourier wrote:</p>
+
+            <blockquote>"The temperature [of the Earth] can be augmented by the interposition of the atmosphere, because heat in the state of light finds less resistance in penetrating the air, than in re-passing into the air when converted into non-luminous heat."<sup>1</sup></blockquote>
+
+            <p>Here, Fourier is describing the "greenhouse effect", or the atmosphere's tendency to trap thermal radiation.  Further, in a paper he wrote in 1827, Fourier suspects human activity could influence climate (albeit in this case, through changes in land use):</p>
+
+            <blockquote>"The establishment and progress of human societies, the action of natural forces, can notably change, and in vast regions, the state of the surface, the distribution of water and the great movements of the air. Such effects are able to make to vary, in the course of many centuries, the average degree of heat; because the analytic expressions contain coefficients relating to the state of the surface and which greatly influence the temperature."<sup>2</sup></blockquote>
+
+            <p>Years later, in 1856, Prof. Joseph Henry presented the work of Eunice Newton Foote at the American Association for the Advancement of Science meeting:</p>
+
+            <blockquote>“A high effect of the sun's rays is produced in carbonic acid gas. [...] An atmosphere of that gas would give to our earth a much higher temperature; and if there once was, as some suppose, a larger proportion of that gas in the air, an increased temperature must have accompanied it, both from the nature of the gas and the increased density of the atmosphere.”<sup>3</sup></blockquote>
+
+            <p>So as early as 1856, there was at least a hunch that human activity, through the release of carbon dioxide into the atmosphere, could alter global climate.</p>
+
+            <p>In 2016, British climate scientist Ed Hawkins publishes an animated GIF on the "open source" climate science blog "<a href="http://www.climate-lab-book.ac.uk">Climate Lab Book</a>" entitled "<a href="http://www.climate-lab-book.ac.uk/2016/spiralling-global-temperatures/">Spiralling global temperatures</a>".  The GIF contains an animated radial plot showing temperature anomolies increasing steadily since 1850, and increasing exponentially in the last decade or so.  The GIF immediately goes viral on the internet.</p>
+
+            <p>The following visualization attempts to put these global temperature anomalies in temporal context with major milestones in climate change science, starting from 1850 to 2019.</p>
+            
+            <button id="continue-button">Continue</button>
+        </div>
+    </div>
+</div>
+
+<div class=chart>
+    <div id="modal-inst1" class="modal">
+        <div class="modal-text">
+            <div class="close">&gt;</div>
+            <p>Shown here is a radial plot, demarcated by radial lines representing months.</p>
+        </div>
+    </div>
+
+    <div id="modal-inst2" class="modal">
+        <div class="modal-text">
+            <div class="close">&gt;</div>
+            <p>The inner circle represents median global temperatures averaged over 1960 to 1991 (a commonly-used reference frame).</p>
+        </div>
+    </div>
+
+    <div id="modal-inst3" class="modal">
+        <div class="modal-text">
+            <div class="close">&gt;</div>
+            <p>The outer circle represents an anomalous temperature 1 °C over the average from 1960 to 1991.</p>
+        </div>
+    </div>
+
+    <div id="modal-inst4" class="modal">
+        <div class="modal-text">
+            <div class="close">&gt;</div>
+            <p>The small blue dot represents the current temperature anomaly in the visualization.  The global median temperature in January of 1850 was 0.7 °C colder than the reference average.</p>
+        </div>
+    </div>
+
+    <div id="modal-inst5" class="modal">
+        <div class="modal-text">
+            <div class="close">&times;</div>
+            <p>Press the Play button below to step through the visualization, or drag the slider to explore on your own.</p>
+        </div>
+    </div>
+        
+    <div class=caption-topleft style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+    <div class=caption-midleft style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+    <div class=caption-bottomleft style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+
+    <svg width=1000 height=700>
+        <circle id="base" cx=500 cy=300 r=166.6667 fill="#F4D00C" stroke="none" opacity=0.4></circle>
+        <circle id="outer" cx=500 cy=300 r=166.6667 fill="none" stroke="grey"></circle>
+        <circle id="inner" cx=500 cy=300 r=83.33333 fill="none" stroke="grey"></circle>
+    </svg>
+
+    <div class=caption-topright style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+    <div class=caption-midright style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+    <div class=caption-bottomright style="color:#f7f7f7">
+        <p></p>
+        <div class=caption><p></p></div>
+    </div>
+
+    <div class=data-source>
+        Data Source: <a href="https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html">Met Office Hadley Centre</a>
+    </div>
+
+    <div id="button">
+        <button id="play-button"><span><svg id="play-svg" width=60 height=40><polygon id="play-pause"></polygon></svg></span></button>
+    </div>
+</div>
+
+<div class="footnote">
+    <sup>1</sup>https://www.bbc.com/news/science-environment-15874560<br>
+    <sup>2</sup>William Connolley. "Translation by W M Connolley of: Fourier 1827: MEMOIRE sur les temperatures du globe terrestre et des espaces planetaires". Retrieved 18 July 2009.<br>
+    <sup>3</sup>Raymond P. Sorenson (2018). "Eunice Foote's Pioneering Research on CO2 and Climate Warming: Update*". AAPG.<br>
+    <sup>4</sup>https://en.wikipedia.org/wiki/Paris_Agreement<br>
+    <sup>5</sup>https://www.history.com/topics/natural-disasters-and-environment/history-of-climate-change<br>
+    <sup>6</sup>https://en.wikipedia.org/wiki/Special_Report_on_Global_Warming_of_1.5_%C2%B0C<br>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+async function init() {
+    var parseDate = d3.timeParse("%m/%d/%Y");
+    var formatDateAsYear = d3.timeFormat("%Y");
+    var formatDateAsMonthYear = d3.timeFormat("%b %Y");
+
+    var margin = 50;
+    var width = 900;
+    var height = 500;
+
+    var svg = d3.select("svg");
+
+    //////////  DATA  //////////
+    var data = await d3.csv("https://raw.githubusercontent.com/joel515/joel515.github.io/master/median_deviation_mod4.csv", 
+        function(d) {
+            d.id = d.id;
+            d.date = parseDate(d.date);
+            d.delta = +d.delta;
+            d.avg = +d.avg;
+            return d;
+        }
+    );
+
+    var textData = await d3.csv("https://raw.githubusercontent.com/joel515/joel515.github.io/master/caption_text.csv");
+
+    var textTiming = await d3.csv("https://raw.githubusercontent.com/joel515/joel515.github.io/master/caption_timing3.csv",
+        function(d) {
+            d.date = parseDate(d.date);
+            return d;
+        }
+    );
+
+    // Add previous date to current data to facilitate line generation
+    for(var i = 1; i < data.length; i++) {
+        data[i].previous = data[i-1];
+    }
+    data[0].previous = data[0];
+
+    //////////  SCALES  //////////
+    var timeScale = d3.scaleTime()
+        .domain([new Date(1850, 0, 1), new Date(2019, 4, 1)])
+        .range([0, width])
+        .clamp(true);
+
+    var dataScale = d3.scaleLinear()
+        .domain([-1, 2])
+        .range([0, height / 2]);
+
+    var colorScale = d3.scaleLinear()
+        .domain([1850, 1884, 1918, 1951, 1985, 2019])
+        .range(["#006495", "#004C70", "#0093D1", "#F2635F", "#F4D00C", "#E0A025"]);
+
+    //////////  DATE SLIDER  //////////
+    var sliderPos = 0;
+    var playing = false;
+    
+    // Group the slider elements
+    var slider = svg.append("g")
+        .attr("class", "slider")
+        .attr("transform", "translate(" + margin + "," + (+height + 100) + ")");
+
+    // Create the track
+    slider.append("line")
+        .attr("class", "slider-track")
+        .attr("x1", 0)
+        .attr("x2", width);
+
+    // Add the handle with a drag callback
+    var handle = slider.append("rect")
+        .attr("class", "slider-handle")
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("width", 18)
+        .attr("height", 9)
+        .attr("x", -9)
+        .attr("y", -4.5)
+        .call(d3.drag()
+            .on("start drag", function() {
+                sliderPos = d3.event.x;
+                if(sliderPos > +width) {
+                    sliderPos = +width;
+                } else if (sliderPos < 0) {
+                    sliderPos = 0;
+                }
+                updateChart(timeScale.invert(sliderPos)); 
+            })
+        );
+        
+    // Add the year tick marks
+    slider.selectAll("text").data(timeScale.ticks(16))
+        .enter().append("text")
+        .attr("class", "slider-ticks")
+        .text(function(d) { return formatDateAsYear(d); })
+        .attr("x", function(d) { return timeScale(d) - 11; })
+        .attr("y", 30);
+
+    // Add a current year label over the slider handle
+    var label = slider.append("text")  
+        .attr("class", "slider-label")
+        .attr("x", -22)
+        .attr("y", -25)
+        .text("Jan 1850");
+
+    //////////  PLAY BUTTON  //////////
+    var playButton = d3.select("#play-button");
+    var playPoly = d3.select("#play-pause")
+        .attr("points", "20,20 20,10 30,15")
+        .attr("fill", "white");
+    var timer;
+    playButton
+        .on("click", function() {
+            if (playing) {
+                playing = false;
+                clearInterval(timer);
+                d3.select(this)
+                    .style("background-color", "none")
+                    .style("background-image", "linear-gradient(to bottom, #F4D00C, #E0A025)");
+                playPoly
+                    .transition()
+                    .attr("points", "20,20 20,10 30,15")
+                d3.select("#play-svg")
+                    .selectAll("line")
+                    .remove();
+                
+            } else {
+                playing = true;
+                timer = setInterval(step, 100);
+                d3.select(this)
+                    .style("background-image", "none")
+                    .style("background-color", "#696969");
+                playPoly
+                    .transition()
+                    .attr("points", "20,20 20,10 30,10 30,20");
+                d3.select("#play-svg")
+                    .append("line")
+                    .transition()
+                    .attr("x1", 25)
+                    .attr("y1", 10)
+                    .attr("x2", 25)
+                    .attr("y2", 20)
+                    .attr("stroke", "#696969")
+                    .attr("stroke-width", 2);
+            }
+        });
+
+    //////////  CONTINUE BUTTON  //////////
+    // When the continue button is pressed, launch a series of modal instructions on how to interpret the chart
+    var continueButton = d3.select("#continue-button");
+    var chartSection = d3.select(".chart");
+    continueButton
+        .on("click", function() {
+            d3.select(this)
+                .transition()
+                .style("width", 20)
+            d3.select(".chart")
+                .style("display", "block");
+            d3.select(".footnote")
+                .style("display", "block");
+
+
+            d3.transition()
+                .duration(3000)
+                .tween("scroll", scrollTween(document.body.getBoundingClientRect().height - window.innerHeight - 50))
+                .on("end", function() {
+                    d3.select("#continue-button")
+                        .style("display", "none");
+                    d3.select("#modal-inst1")
+                        .style("display", "block")
+                        .on("click", displayModalInst1);
+                });
+
+            // Tween implementation hacked from Mike Bostock's Block (https://bl.ocks.org/mbostock/1649463)
+            // Handles an automatic scroll to the bottom of the sheet
+            function scrollTween(offset) {
+                return function() {
+                    var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+                    return function(t) { scrollTo(0, i(t)); };
+                };
+            }
+        });
+
+    function displayModalInst1() {
+        d3.select("#modal-inst1")
+            .style("display", "block")
+            .on("click", function() {
+                d3.select(this)
+                    .style("display", "none");
+                axisGroup.selectAll("line")
+                    .transition()
+                    .attr("stroke-width",5)
+                    .attr("stroke", "#F4D00C")
+                    .transition().duration(1500)
+                    .attr("stroke-width", 0.5)
+                    .attr("stroke", "grey")
+                    .on("end", displayModalInst2);
+            });
+    }
+
+    function displayModalInst2() {
+        d3.select("#modal-inst2")
+            .style("display", "block")
+            .on("click", function () {
+                d3.select(this)
+                    .style("display", "none");
+                svg.select("#inner")
+                    .transition()
+                    .attr("stroke-width", 5)
+                    .attr("stroke", "#F4D00C")
+                    .transition().duration(1500)
+                    .attr("stroke-width", 0.5)
+                    .attr("stroke", "black")
+                    .on("end", displayModalInst3);
+            });
+    }
+
+    function displayModalInst3() {
+        d3.select("#modal-inst3")
+            .style("display", "block")
+            .on("click", function () {
+                d3.select(this)
+                    .style("display", "none");
+                svg.select("#outer")
+                    .transition()
+                    .attr("stroke-width", 5)
+                    .attr("stroke", "#F4D00C")
+                    .transition().duration(1500)
+                    .attr("stroke-width", 0.5)
+                    .attr("stroke", "black")
+                    .on("end", displayModalInst4);
+            });
+    }
+
+    function displayModalInst4() {
+        d3.select("#modal-inst4")
+            .style("display", "block")
+            .on("click", function () {
+                d3.select(this)
+                    .style("display", "none");
+                pointer
+                    .transition()
+                    .attr("r", 10)
+                    .attr("fill", "#F4D00C")
+                    .transition().duration(1500)
+                    .attr("r", 4)
+                    .attr("fill", "#006495")
+                    .on("end", displayModalInst5);
+            });
+    }
+
+    function displayModalInst5() {
+        d3.select("#modal-inst5")
+            .style("display", "block")
+            .on("click", function () {
+                d3.select(this)
+                    .style("display", "none");
+            });
+        d3.select("#play-button")
+            .style("visibility", "visible");
+    }
+
+    //////////  DYNAMIC UPDATES  //////////
+    // Functinon to step either through playing or by dragging
+    function step() {
+        var inc;
+
+        // Begin to slow down animation to allow viewer to absorb captions
+        if(sliderPos < 728) {
+            inc = 1000;
+        } else if(sliderPos < 781) {
+            inc = 3000;
+        } else if(sliderPos < 830) {
+            inc = 6000;
+        } else {
+            inc = 12000;
+        }
+
+        updateChart(timeScale.invert(sliderPos));
+        sliderPos = sliderPos + width / inc;
+
+        // When reaching the end of the slider...
+        if (sliderPos > width) {
+            playing = false;
+            sliderPos = 0;
+            clearInterval(timer);
+            playButton
+                .style("background-color", "none")
+                .style("background-image", "linear-gradient(to bottom, #F4D00C, #E0A025)");
+            playPoly
+                .transition()
+                .attr("points", "20,20 20,10 30,15")
+            d3.select("#play-svg")
+                .selectAll("line")
+                .remove();
+        }
+    }
+
+    // Update the chart and the slider elements
+    function updateChart(date) {
+        handle
+            .attr("x", timeScale(date) - 9);
+        label
+            .attr("x", timeScale(date) - 20)
+            .text(formatDateAsMonthYear(date));
+
+        var newData = data.filter(function(d) {
+            return d.date <= date;
+        });
+
+        var newText = textTiming.filter(function(d) {
+            return d.date <= date;
+        })
+
+        drawPlot(newData, textData);
+        drawText(newText);
+    }
+
+    var lineGroup = svg.append("g")
+        .attr("transform", "translate("+margin+","+margin+")")
+        .attr("class", "lines");
+
+    var circleGroup = svg.append("g")
+        .attr("transform", "translate("+margin+","+margin+")")
+        .attr("class", "circles");
+
+    var pointer = circleGroup.append("circle")
+        .attr("cx", 450)
+        .attr("cy", 225)
+        .attr("r", 4)
+        .attr("fill", "#006495")
+        .attr("stroke", "black")
+        .attr("id", "pointer");
+
+    //////////  AXES  //////////
+    var axisGroup = svg.append("g")
+        .attr("transform", "translate("+margin+","+margin+")")
+        .attr("class", "radar-ticks");
+
+    var months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
+
+    for(var i = 0; i < 12; i++) {
+        axisGroup.append("line")
+            .attr("x1", width / 2)
+            .attr("y1", height / 2)
+            .attr("x2", width / 2 + 166.6667 * Math.sin(i * Math.PI / 6))
+            .attr("y2", height / 2 - 166.6667 * Math.cos(i * Math.PI / 6))
+            .attr("stroke", "grey")
+            .attr("stroke-width", 0.5);
+
+        axisGroup.append("text")
+            .attr("x", width / 2)
+            .attr("y", height / 2)
+            .attr("transform", "rotate("+(i*30-90)+","+(width/2)+","+(height/2)+") translate(180, 4)")
+            .attr("fill", "grey")
+            .text(months[i]);
+    }
+
+    axisGroup.append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("transform", "translate(6, -70) rotate(15,"+(width/2)+","+(height/2)+")")
+        .attr("fill", "grey")
+        .text("0 °C");
+
+    axisGroup.append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("transform", "translate(25, -150) rotate(15,"+(width/2)+","+(height/2)+")")
+        .attr("fill", "grey")
+        .text("1 °C");
+
+    // Handles timing events - when to turn caption divs on and off depending on the current year on the slider
+    function drawText(timing) {
+        if(timing.length) {
+            curText = timing[timing.length - 1]
+            if(curText.div1_on == 1) {
+                setTop(".caption-topleft", curText.div1_top);
+                setText(".caption-topleft", textData[+curText.div1_text - 1].year, textData[+curText.div1_text - 1].text);
+                switchTextOn(".caption-topleft"); 
+            } else { 
+                switchTextOff(".caption-topleft");
+                setText(".caption-topleft", "", "");
+            }
+            if(curText.div2_on == 1) {
+                setTop(".caption-midleft", curText.div2_top);
+                setText(".caption-midleft", textData[+curText.div2_text - 1].year, textData[+curText.div2_text - 1].text);
+                switchTextOn(".caption-midleft"); 
+            } else { 
+                switchTextOff(".caption-midleft");
+                setText(".caption-midleft", "", "");
+            }
+            if(curText.div3_on == 1) {
+                setTop(".caption-bottomleft", curText.div3_top);
+                setText(".caption-bottomleft", textData[+curText.div3_text - 1].year, textData[+curText.div3_text - 1].text);
+                switchTextOn(".caption-bottomleft"); 
+            } else { 
+                switchTextOff(".caption-bottomleft");
+                setText(".caption-bottomleft", "", "");
+            }
+            if(curText.div4_on == 1) {
+                setTop(".caption-topright", curText.div4_top);
+                setText(".caption-topright", textData[+curText.div4_text - 1].year, textData[+curText.div4_text - 1].text);
+                switchTextOn(".caption-topright"); 
+            } else { 
+                switchTextOff(".caption-topright");
+                setText(".caption-topright", "", ""); 
+            }
+            if(curText.div5_on == 1) {
+                setTop(".caption-midright", curText.div5_top);
+                setText(".caption-midright", textData[+curText.div5_text - 1].year, textData[+curText.div5_text - 1].text);
+                switchTextOn(".caption-midright"); 
+            } else { 
+                switchTextOff(".caption-midright");
+                setText(".caption-midright", "", ""); 
+            }
+            if(curText.div6_on == 1) {
+                setTop(".caption-bottomright", curText.div6_top);
+                setText(".caption-bottomright", textData[+curText.div6_text - 1].year, textData[+curText.div6_text - 1].text);
+                switchTextOn(".caption-bottomright"); 
+            } else { 
+                switchTextOff(".caption-bottomright");
+                setText(".caption-bottomright", "", ""); 
+            }
+        } else {
+            switchTextOff(".caption-topleft");
+            setText(".caption-topleft", "", "");
+            switchTextOff(".caption-midleft");
+            setText(".caption-midleft", "", "");
+            switchTextOff(".caption-bottomleft");
+            setText(".caption-bottomleft", "", "");
+            switchTextOff(".caption-topright");
+            setText(".caption-topright", "", "");
+            switchTextOff(".caption-midright");
+            setText(".caption-midright", "", ""); 
+            switchTextOff(".caption-bottomright");
+            setText(".caption-bottomright", "", ""); 
+        }
+    }
+
+    // Set the caption text
+    function setText(div, year, text) {
+        d3.select(div)
+            .select("p")
+            .text(year);
+        d3.select(div)
+            .select(".caption")
+            .select("p")
+            .text(text);
+    }
+
+    // Set the position of the caption
+    function setTop(div, top) {
+        d3.select(div)
+            .style("top", top);
+    }
+
+    // View the caption div
+    function switchTextOn(div) {
+        d3.select(div)
+            .select("p")
+            .transition()
+            .style("color", "black");
+        d3.select(div)
+            .select(".caption")
+            .select("p")
+            .transition()
+            .style("color", "black");
+    }
+
+    // Hide the caption div
+    function switchTextOff(div) {
+        d3.select(div)
+            .select("p")
+            .transition()
+            .style("color", "#f7f7f7");
+        d3.select(div)
+            .select(".caption")
+            .select("p")
+            .transition()
+            .style("color", "#f7f7f7");
+    }
+
+    tooltip = d3.select("#tooltip");
+
+    // Draw the lines on the radial plot, the leading pointer circle, and assign tooltip annotations
+    function drawPlot(data) {
+        lines = lineGroup.selectAll("line").data(data);
+
+        lines.enter().append("line")
+            .attr("x1", function(d) { return width / 2 + dataScale(d.previous.delta) * Math.sin(d.previous.date.getMonth() * Math.PI / 6); })
+            .attr("y1", function(d) { return height / 2 - dataScale(d.previous.delta) * Math.cos(d.previous.date.getMonth() * Math.PI / 6); })
+            .attr("x2", function(d) { return width / 2 + dataScale(d.delta) * Math.sin(d.date.getMonth() * Math.PI / 6); })
+            .attr("y2", function(d) { return height / 2 - dataScale(d.delta) * Math.cos(d.date.getMonth() * Math.PI / 6); })
+            .attr("id", function(d) { return "year-"+d.previous.date.getFullYear(); })
+            .on("mouseover", function(d) {
+                if(!playing) {
+                    tooltip
+                        .style("display", "block")
+                        .style("left",(d3.event.pageX)+"px")
+                        .style("top",(d3.event.pageY - 40)+"px")
+                        .html(d.previous.date.getFullYear() + "<br>Average Anomaly: " + d.previous.avg + " &deg;C");
+                    lineGroup.selectAll("line")
+                        .attr("opacity", 0.1);
+                    d3.selectAll("#year-"+d.previous.date.getFullYear())
+                        .attr("opacity", 1)
+                        .attr("stroke-width", 6)
+                        .transition()
+                        .attr("stroke-width", 2);
+                }
+            })
+            .on("mouseout", function(d) {
+                if(!playing) {
+                    tooltip
+                        .style("display", "none");
+                    lineGroup.selectAll("line")
+                        .attr("opacity", 0.6);
+                    d3.selectAll("#year-"+d.previous.date.getFullYear())
+                        .attr("opacity", 0.6)
+                        .attr("stroke-width", 2);
+                }
+            })
+            .transition()
+            .attr("stroke", function(d) { return colorScale(d.date.getFullYear()); })
+            .attr("stroke-width", 2)
+            .attr("fill", "none")
+            .attr("stroke-opacity", 0.6);
+
+        lines.exit()
+            .remove();
+
+        if(data.length) {
+            var current = data[data.length-1];
+            pointer
+                .transition().duration(150)
+                .attr("cx", width / 2 + dataScale(current.delta) * Math.sin(current.date.getMonth() * Math.PI / 6))
+                .attr("cy", height / 2 - dataScale(current.delta) * Math.cos(current.date.getMonth() * Math.PI / 6))
+                .attr("fill", colorScale(current.date.getFullYear()));
+        } else {
+            pointer
+                .attr("cx", 450)
+                .attr("cy", 225)
+                .attr("fill", "#006495");
+        }
+    }
+}
+</script>
+</body>
+</html>
