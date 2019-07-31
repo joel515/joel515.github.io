@@ -760,7 +760,7 @@ async function init() {
             return d.date <= date;
         })
 
-        drawPlot(newData, textData);
+        drawPlot(newData);
         drawText(newText);
     }
 
@@ -913,7 +913,7 @@ async function init() {
     // Set the position of the caption
     function setTop(div, top) {
         d3.select(div)
-            .attr("top", top);
+            .style("top", top + "px");
     }
 
     // View the caption div
